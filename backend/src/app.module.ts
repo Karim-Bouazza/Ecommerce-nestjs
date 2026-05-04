@@ -4,6 +4,9 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { JwtModule } from '@nestjs/jwt';
+import ms from 'ms';
 
 @Module({
   imports: [
@@ -23,7 +26,8 @@ import { UsersModule } from './users/users.module';
         synchronize: true,
       })
     }),
-    UsersModule
+    UsersModule,
+    AuthenticationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
