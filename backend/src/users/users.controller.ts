@@ -1,18 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  SerializeOptions,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiResponseDto } from '../common/dto/api-response.dto';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enum/role.enum';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   @SerializeOptions({ strategy: 'excludeAll' })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
-    return new ApiResponseDto(user, "User created successfully");
+    return new ApiResponseDto(user, 'User created successfully');
   }
 
   @Get()
