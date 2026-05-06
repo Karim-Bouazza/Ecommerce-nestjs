@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CategoriesModule } from './categories/categories.module';
+import { ProvincesModule } from './provinces/provinces.module';
 import ms from 'ms';
 
 @Module({
@@ -30,6 +31,7 @@ import ms from 'ms';
     UsersModule,
     AuthenticationModule,
     CategoriesModule,
+    ProvincesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
