@@ -41,7 +41,12 @@ export class ProvincesService {
   }
 
   async findOne(id: number) {
-    const province = await this.provinceRepository.findOne({ where: { id } });
+    const province = await this.provinceRepository.findOne({
+      where: { id },
+      relations: {
+        cities: true,
+      },
+    });
     if (!province) {
       throw new NotFoundException('Province not found');
     }

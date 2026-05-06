@@ -8,6 +8,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CategoriesModule } from './categories/categories.module';
 import { ProvincesModule } from './provinces/provinces.module';
+import { CitiesModule } from './cities/cities.module';
 import ms from 'ms';
 
 @Module({
@@ -32,6 +33,7 @@ import ms from 'ms';
     AuthenticationModule,
     CategoriesModule,
     ProvincesModule,
+    CitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

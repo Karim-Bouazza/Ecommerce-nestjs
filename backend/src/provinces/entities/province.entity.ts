@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { City } from '../../cities/entities/city.entity';
 
 @Entity()
 export class Province {
@@ -16,4 +17,7 @@ export class Province {
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   price_stop_disk?: number;
+
+  @OneToMany(() => City, (city) => city.province)
+  cities: City[];
 }

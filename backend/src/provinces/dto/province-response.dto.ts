@@ -1,5 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { ProvincePricesDto } from './province-prices.dto';
+import { ProvinceCitiesDto } from './province-cities.dto';
 
 export class ProvinceResponseDto {
   @Expose()
@@ -18,6 +19,10 @@ export class ProvinceResponseDto {
     stop_disk: obj.price_stop_disk ? parseFloat(obj.price_stop_disk) : null,
   }))
   prices: ProvincePricesDto;
+
+  @Expose()
+  @Type(() => ProvinceCitiesDto)
+  cities: ProvinceCitiesDto[];
 
   constructor(partial: Partial<ProvinceResponseDto>) {
     Object.assign(this, partial);
