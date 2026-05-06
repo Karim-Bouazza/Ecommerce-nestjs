@@ -8,6 +8,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
+import { CategoryResponseDto } from './dto/category-response.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -29,20 +30,26 @@ export class CategoriesService {
 
     const newCategory = this.categoryRepository.create(createCategoryDto);
 
-    return await this.categoryRepository.save(newCategory);
+    const savedCategory = await this.categoryRepository.save(newCategory);
+    return new CategoryResponseDto(savedCategory);
   }
 
   async findAll() {
     const categories = await this.categoryRepository.find();
-    return categories;
+    return categories.map((category) => new CategoryResponseDto(category));
   }
 
   async findOne(id: number) {
-    const category = await this.categoryRepository.findOne({ where: { id } });
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: {
+        products: true,
+      },
+    });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-    return category;
+    return new CategoryResponseDto(category);
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
@@ -61,7 +68,8 @@ export class CategoriesService {
 
     const updatedCategory = Object.assign(category, updateCategoryDto);
 
-    return await this.categoryRepository.save(updatedCategory);
+    const savedCategory = await this.categoryRepository.save(updatedCategory);
+    return new CategoryResponseDto(savedCategory);
   }
 
   async remove(id: number) {
@@ -71,6 +79,6 @@ export class CategoriesService {
     }
 
     await this.categoryRepository.remove(category);
-    return category;
+    return new CategoryResponseDto(category);
   }
 }

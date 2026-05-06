@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  SerializeOptions,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -20,6 +21,7 @@ import { Role } from '../common/enum/role.enum';
 @Controller('categories')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
+@SerializeOptions({ strategy: 'excludeAll' })
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 

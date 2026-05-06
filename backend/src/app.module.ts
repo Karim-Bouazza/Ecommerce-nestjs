@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CategoriesModule } from './categories/categories.module';
 import { ProvincesModule } from './provinces/provinces.module';
 import { CitiesModule } from './cities/cities.module';
+import { ProductsModule } from './products/products.module';
 import ms from 'ms';
 
 @Module({
@@ -34,6 +35,7 @@ import ms from 'ms';
     CategoriesModule,
     ProvincesModule,
     CitiesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
