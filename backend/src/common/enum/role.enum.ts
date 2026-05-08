@@ -1,4 +1,12 @@
 export enum Role {
-  ADMIN = 'admin',
-  CLIENT = 'client',
+  ADMIN = 'ADMIN',
+  COMMERCIAL = 'COMMERCIAL',
+  TRANSPORTEUR = 'TRANSPORTEUR',
+  OPERATEUR = 'OPERATEUR',
+  FOURNISSEUR = 'FOURNISSEUR',
+}
+
+export enum UserType {
+  INTERNAL = 'INTERNAL',
+  EXTERNAL = 'EXTERNAL',
 }

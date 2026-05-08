@@ -10,9 +10,7 @@ import {
 import { AuthenticationService } from './authentication.service';
 import { LoginAuthenticationDto } from './dto/login-authentication.dto';
 import { ApiResponseDto } from '../common/dto/api-response.dto';
-import { RegisterAuthenticationDto } from './dto/register-authentication.dto';
 import type { Request, Response } from 'express';
-import { RegisterResponseDto } from './dto/register-response.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @Controller()
@@ -35,28 +33,6 @@ export class AuthenticationController {
     });
 
     return new ApiResponseDto({ accessToken }, 'Login successful');
-  }
-
-  @Post('register')
-  @SerializeOptions({ strategy: 'excludeAll' })
-  async register(
-    @Body() registerAuthenticationDto: RegisterAuthenticationDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, accessToken, refreshToken } =
-      await this.authenticationService.register(registerAuthenticationDto);
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      path: '/',
-    });
-
-    return new ApiResponseDto(
-      new RegisterResponseDto({ ...user, accessToken }),
-      'Registration successful',
-    );
   }
 
   @Post('logout')

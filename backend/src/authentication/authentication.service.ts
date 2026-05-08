@@ -1,96 +1,72 @@
 import {
-  ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginAuthenticationDto } from './dto/login-authentication.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { RegisterAuthenticationDto } from './dto/register-authentication.dto';
-import { Role } from '../common/enum/role.enum';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UserResponseBuilderService } from '../common/utils/user-response-builder.service';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
-    @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly userResponseBuilder: UserResponseBuilderService,
   ) {}
 
-  async login(loginAuthenticationDto: LoginAuthenticationDto) {
-    const { username, password } = loginAuthenticationDto;
-
-    const existingUser = await this.usersRepository.findOne({
-      where: { username },
+  async login(dto: LoginAuthenticationDto) {
+    const user = await this.usersRepository.findOne({
+      where: { username: dto.username },
+      relations: ['fournisseurProfile', 'internalProfile'],
     });
 
-    if (!existingUser) {
-      throw new UnauthorizedException('Invalid username or password');
+    if (!user) {
+      throw new UnauthorizedException(
+        'Nom d’utilisateur ou mot de passe incorrect',
+      );
     }
 
-    const isMatch = await bcrypt.compare(password, existingUser.password);
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid username or password');
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(
+        'Nom d’utilisateur ou mot de passe incorrect',
+      );
     }
 
-    const { accessToken, refreshToken } = this.generateTokens(existingUser);
+    if (!user.isActive) {
+      throw new ForbiddenException(
+        'Votre compte est désactivé, veuillez contacter l’administrateur',
+      );
+    }
+
+    const { accessToken, refreshToken } = await this.generateTokens(user);
 
     const hashedRefreshToken = await bcrypt.hash(
       refreshToken,
       parseInt(this.configService.get('BCRYPT_SALT_ROUNDS') ?? '10'),
     );
-    await this.usersRepository.update(existingUser.id, {
-      refreshToken: hashedRefreshToken,
-    });
 
-    return { accessToken, refreshToken };
-  }
-
-  async register(registerAuthenticationDto: RegisterAuthenticationDto) {
-    const { username, email, password } = registerAuthenticationDto;
-
-    const existingUser = await this.usersRepository.findOne({
-      where: [{ username }, { email }],
-    });
-
-    if (existingUser) {
-      throw new ConflictException('Username or email already exists');
-    }
-
-    const saltOrRounds = parseInt(
-      this.configService.get('BCRYPT_SALT_ROUNDS') ?? '10',
-    );
-    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-
-    const newUser = this.usersRepository.create({
-      ...registerAuthenticationDto,
-      role: Role.CLIENT,
-      password: hashedPassword,
-    });
-
-    const savedUser = await this.usersRepository.save(newUser);
-
-    const { accessToken, refreshToken } = this.generateTokens(savedUser);
-
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, saltOrRounds);
-    await this.usersRepository.update(savedUser.id, {
+    await this.usersRepository.update(user.id, {
       refreshToken: hashedRefreshToken,
     });
 
     return {
-      user: savedUser,
       accessToken,
       refreshToken,
+      user: this.userResponseBuilder.build(user),
     };
   }
 
-  async logout(userId: number) {
+  async logout(userId: string) {
     await this.usersRepository.update(userId, { refreshToken: null });
   }
 
@@ -118,7 +94,7 @@ export class AuthenticationService {
     return { accessToken };
   }
 
-  private generateTokens(user: Users) {
+  private generateTokens(user: User) {
     const payload = { sub: user.id, username: user.username, role: user.role };
 
     const accessToken: string = this.jwtService.sign(payload, {
@@ -134,7 +110,7 @@ export class AuthenticationService {
     return { accessToken, refreshToken };
   }
 
-  private async generateAccessToken(user: Users) {
+  private async generateAccessToken(user: User) {
     const payload = { sub: user.id, username: user.username, role: user.role };
 
     const accessToken: string = this.jwtService.sign(payload, {

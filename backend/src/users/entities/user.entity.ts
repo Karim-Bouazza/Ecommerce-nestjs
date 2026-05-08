@@ -2,52 +2,51 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../common/enum/role.enum';
+import { Role, UserType } from '../../common/enum/role.enum';
+import { FournisseurProfile } from './fournisseur-profile.entity';
+import { InternalProfile } from './internal-profile.entity';
 
-@Entity()
-export class Users {
+@Entity('users')
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ unique: true })
   username: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ nullable: true })
+  firstName?: string;
 
   @Column({ nullable: true })
-  email_verified_at: Date;
+  lastName?: string;
+
+  @Column({ unique: true, nullable: true })
+  email?: string;
 
   @Column()
   password: string;
 
-  @Column()
-  first_name: string;
-
-  @Column()
-  last_name: string;
-
-  @Column({ nullable: true })
-  phone_number?: string;
-
-  @Column({ nullable: true })
-  province?: string;
-
-  @Column({ nullable: true })
-  city?: string;
-
-  @Column({
-    type: 'enum',
-    enum: Role,
-    default: Role.CLIENT,
-  })
+  @Column({ type: 'enum', enum: Role })
   role: Role;
 
+  @Column({ type: 'enum', enum: UserType })
+  userType: UserType;
+
+  @OneToOne(() => FournisseurProfile, (p) => p.user, { nullable: true })
+  fournisseurProfile: FournisseurProfile;
+
+  @OneToOne(() => InternalProfile, (p) => p.user, { nullable: true })
+  internalProfile: InternalProfile;
+
+  @Column({ default: true })
+  isActive: boolean;
+
   @Column({ type: 'text', nullable: true })
-  refreshToken: string | null;
+  refreshToken?: string | null;
 
   @CreateDateColumn()
   createdAt: Date;
