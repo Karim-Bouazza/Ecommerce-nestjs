@@ -9,6 +9,9 @@ export class Category {
   @Column({ unique: true })
   name: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 }

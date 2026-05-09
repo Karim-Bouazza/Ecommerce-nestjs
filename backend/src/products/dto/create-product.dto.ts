@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
@@ -9,28 +10,57 @@ import {
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
+  codeBarre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  ref: string;
+
+  @IsString()
+  @IsNotEmpty()
   name: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  pv1Ht: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  pv2Ht: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  pv3Ht: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  stockMin: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  stockIni: number;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  image?: string;
 
+  @Type(() => Number)
+  @IsNumber()
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  quantity: number;
+  categoryId?: number;
 
+  @Type(() => Number)
   @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  price: number;
-
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  price_after_discount?: number;
+  brandId?: number;
 
+  @Type(() => Number)
   @IsNumber()
-  @IsNotEmpty()
-  categoryId: number;
+  @IsOptional()
+  depotId?: number;
 }

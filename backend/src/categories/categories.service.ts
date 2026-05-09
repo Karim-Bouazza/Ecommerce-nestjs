@@ -21,64 +21,78 @@ export class CategoriesService {
     const { name } = createCategoryDto;
 
     const isExistCategory = await this.categoryRepository.findOne({
-      where: { name },
+      where: { name, isActive: true },
     });
 
     if (isExistCategory) {
-      throw new ConflictException('Category already exists');
+      throw new ConflictException('La categorie existe deja');
     }
 
     const newCategory = this.categoryRepository.create(createCategoryDto);
 
     const savedCategory = await this.categoryRepository.save(newCategory);
-    return new CategoryResponseDto(savedCategory);
+    return new CategoryResponseDto(savedCategory as any);
   }
 
   async findAll() {
-    const categories = await this.categoryRepository.find();
-    return categories.map((category) => new CategoryResponseDto(category));
+    const categories = await this.categoryRepository.find({
+      where: { isActive: true },
+    });
+    return categories.map(
+      (category) => new CategoryResponseDto(category as any),
+    );
   }
 
   async findOne(id: number) {
-    const category = await this.categoryRepository.findOne({
-      where: { id },
-      relations: {
-        products: true,
-      },
-    });
+    const category = await this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect(
+        'category.products',
+        'product',
+        'product.isActive = :isActive',
+        { isActive: true },
+      )
+      .where('category.id = :id', { id })
+      .andWhere('category.isActive = :categoryActive', { categoryActive: true })
+      .getOne();
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException('Categorie introuvable');
     }
-    return new CategoryResponseDto(category);
+    return new CategoryResponseDto(category as any);
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    const category = await this.categoryRepository.findOne({ where: { id } });
+    const category = await this.categoryRepository.findOne({
+      where: { id, isActive: true },
+    });
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException('Categorie introuvable');
     }
 
     const existingCategory = await this.categoryRepository.findOne({
-      where: { name: updateCategoryDto.name },
+      where: { name: updateCategoryDto.name, isActive: true },
     });
 
     if (existingCategory && existingCategory.id !== id) {
-      throw new ConflictException('Category name already exists');
+      throw new ConflictException('Le nom de la categorie existe deja');
     }
 
     const updatedCategory = Object.assign(category, updateCategoryDto);
 
     const savedCategory = await this.categoryRepository.save(updatedCategory);
-    return new CategoryResponseDto(savedCategory);
+    return new CategoryResponseDto(savedCategory as any);
   }
 
   async remove(id: number) {
-    const category = await this.categoryRepository.findOne({ where: { id } });
-    if (!category) {
-      throw new NotFoundException('Category not found');
+    const result = await this.categoryRepository.update(
+      { id, isActive: true },
+      { isActive: false },
+    );
+
+    if (!result.affected) {
+      throw new NotFoundException('Categorie introuvable');
     }
 
-    await this.categoryRepository.remove(category);
-    return new CategoryResponseDto(category);
+    return { id, isActive: false };
   }
 }

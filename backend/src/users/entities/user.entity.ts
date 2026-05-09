@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role, UserType } from '../../common/enum/role.enum';
 import { FournisseurProfile } from './fournisseur-profile.entity';
 import { InternalProfile } from './internal-profile.entity';
+import { ProductHistory } from '../../products/entities/product-history.entity';
 
 @Entity('users')
 export class User {
@@ -41,6 +43,9 @@ export class User {
 
   @OneToOne(() => InternalProfile, (p) => p.user, { nullable: true })
   internalProfile: InternalProfile;
+
+  @OneToMany(() => ProductHistory, (history) => history.user)
+  productHistories: ProductHistory[];
 
   @Column({ default: true })
   isActive: boolean;

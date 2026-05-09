@@ -4,19 +4,21 @@ import {
   Entity,
   JoinColumn,
   OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { FournisseurProduct } from '../../fournisseur-products/entities/fournisseur-product.entity';
 
 @Entity('fournisseur_profiles')
 export class FournisseurProfile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
-  user: User;
+  user?: User | null;
 
   @Column()
   companyName: string;
@@ -74,4 +76,10 @@ export class FournisseurProfile {
 
   @Column({ type: 'timestamp', nullable: true })
   lastActivity?: Date;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @OneToMany(() => FournisseurProduct, (fp) => fp.fournisseur)
+  products: FournisseurProduct[];
 }

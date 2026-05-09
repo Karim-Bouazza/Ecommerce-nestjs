@@ -19,7 +19,7 @@ import { Role } from '../common/enum/role.enum';
 
 @Controller('cities')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN, Role.COMMERCIAL)
 @SerializeOptions({ strategy: 'excludeAll' })
 export class CitiesController {
   constructor(private readonly citiesService: CitiesService) {}

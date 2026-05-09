@@ -5,5 +5,8 @@ export class CategoryProductDto {
   id: number;
 
   @Expose()
+  codeBarre: string;
+
+  @Expose()
   name: string;
 }
